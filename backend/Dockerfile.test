@@ -1,0 +1,28 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies including testing tools
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt pytest pytest-django
+
+# Copy project files
+COPY . .
+
+# Create media directory
+RUN mkdir -p /app/media /app/data
+RUN chmod -R 777 /app/media /app/data
+
+# Set environment variables
+ENV PYTHONPATH=/app:.
+ENV DJANGO_SETTINGS_MODULE=core.settings
+ENV DEBUG=1
+
+# Command to run tests
+CMD ["python", "-m", "pytest", "files/tests.py", "-v"] 
