@@ -38,5 +38,5 @@ ENV REACT_APP_API_URL=http://localhost:8000/api
 # Expose port
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"] 
+# Start the application with host binding
+CMD ["npm", "start", "--", "--host", "0.0.0.0"] 

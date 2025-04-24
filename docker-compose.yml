@@ -13,7 +13,7 @@ services:
       - DJANGO_SETTINGS_MODULE=core.settings
       - DEBUG=1
       - SECRET_KEY=django-insecure-test-key
-      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
     command: python manage.py runserver 0.0.0.0:8000
 
   frontend:
@@ -27,7 +27,7 @@ services:
       - /app/node_modules
     environment:
       - REACT_APP_API_URL=http://localhost:8000/api
-    command: npm start
+    command: npm start -- --host 0.0.0.0
 
   backend-test:
     build:
@@ -39,7 +39,7 @@ services:
       - DJANGO_SETTINGS_MODULE=core.settings
       - DEBUG=1
       - SECRET_KEY=django-insecure-test-key
-      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
       - PYTHONPATH=/app:.
     depends_on:
       - backend
