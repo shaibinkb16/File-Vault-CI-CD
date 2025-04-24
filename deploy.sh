@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Update system packages
-sudo apt-get update && sudo apt-get upgrade -y
+sudo yum update -y
 
 # Install Docker if not already installed
 if ! command -v docker &> /dev/null; then
-    sudo apt-get install -y docker.io
+    sudo amazon-linux-extras enable docker
+    sudo yum install -y docker
     sudo systemctl start docker
     sudo systemctl enable docker
     sudo usermod -aG docker $USER
