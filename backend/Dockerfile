@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn pytest pytest-django pytest-cov
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . .
@@ -19,9 +19,15 @@ COPY . .
 RUN mkdir -p /app/media /app/data
 RUN chmod -R 777 /app/media /app/data
 
-# Make start script executable
-RUN chmod +x start.sh
+# Set environment variables
+ENV PYTHONPATH=/app:.
+ENV DJANGO_SETTINGS_MODULE=core.settings
+ENV DEBUG=1
+ENV ALLOWED_HOSTS=*
+ENV CORS_ORIGIN_ALLOW_ALL=True
 
+# Expose port
 EXPOSE 8000
 
-CMD ["./start.sh"] 
+# Start the application
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"] 

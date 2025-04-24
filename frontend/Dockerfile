@@ -34,9 +34,11 @@ COPY . .
 
 # Set environment variables
 ENV REACT_APP_API_URL=http://localhost:8000/api
+ENV HOST=0.0.0.0
+ENV PORT=3000
 
 # Expose port
 EXPOSE 3000
 
 # Start the application with host binding
-CMD ["npm", "start", "--", "--host", "0.0.0.0"] 
+CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "3000"] 
