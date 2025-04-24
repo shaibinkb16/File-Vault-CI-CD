@@ -31,4 +31,4 @@ jobs:
         script: |
           cd abnormal-file-hub
           chmod +x deploy.sh
-          ./deploy.sh 
+          ./deploy.sh
