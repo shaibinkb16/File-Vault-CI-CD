@@ -10,13 +10,10 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - DJANGO_SETTINGS_MODULE=core.settings
-      - DEBUG=1
-      - SECRET_KEY=django-insecure-test-key
-      - ALLOWED_HOSTS=*
-      - CORS_ORIGIN_ALLOW_ALL=True
+      - DJANGO_SETTINGS_MODULE=config.settings
+      - DEBUG=True
+      - SECRET_KEY=your-secret-key-here
     command: python manage.py runserver 0.0.0.0:8000
-    restart: unless-stopped
 
   frontend:
     build:
@@ -28,54 +25,8 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - REACT_APP_API_URL=http://localhost:8000/api
-    command: npm start -- --host 0.0.0.0
-    restart: unless-stopped
-    depends_on:
-      - backend
-
-  backend-test:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.test
-    volumes:
-      - ./backend:/app
-    environment:
-      - DJANGO_SETTINGS_MODULE=core.settings
-      - DEBUG=1
-      - SECRET_KEY=django-insecure-test-key
-      - ALLOWED_HOSTS=*
-      - PYTHONPATH=/app:.
-    depends_on:
-      - backend
-
-  frontend-test:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.test
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - CI=true
-      - REACT_APP_API_URL=http://localhost:8000/api
-    depends_on:
-      - backend
-
-  e2e-test:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.test
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - CYPRESS_BASE_URL=http://frontend:3000
-      - REACT_APP_API_URL=http://backend:8000/api
-    command: npx cypress run
-    depends_on:
-      - frontend
-      - backend
+      - REACT_APP_API_URL=http://localhost:8000
+    command: npm start
 
 volumes:
   media_data: 
