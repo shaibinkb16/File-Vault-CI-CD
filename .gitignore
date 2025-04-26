@@ -154,3 +154,5 @@ yarn-error.log*
 assessment.cursorrules
 interview-context.md
 base_project_requirements.md
+# Local Netlify folder
+.netlify
