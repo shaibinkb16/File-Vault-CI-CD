@@ -8,7 +8,7 @@ interface SearchParams {
   sizeMax?: string;
 }
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
+const API_URL = 'http://13.126.10.121:8001/api';
 
 export const fileService = {
   async uploadFile(file: globalThis.File): Promise<File> {
