@@ -4,10 +4,10 @@ from .settings import *
 
 DEBUG = False
 
-# Security settings
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Security settings - temporarily disabled for testing
+SECURE_SSL_REDIRECT = False  # Changed to False for testing
+SESSION_COOKIE_SECURE = False  # Changed to False for testing
+CSRF_COOKIE_SECURE = False  # Changed to False for testing
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
@@ -17,13 +17,16 @@ SECURE_HSTS_PRELOAD = True
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "https://your-netlify-domain.netlify.app"
+    "https://file-vault-cicd.netlify.app",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 # Allowed hosts and CSRF settings
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 CSRF_TRUSTED_ORIGINS = [
+    'https://file-vault-cicd.netlify.app',
     'http://13.126.10.121',
     'http://localhost',
     'http://127.0.0.1'
