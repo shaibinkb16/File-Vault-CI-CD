@@ -15,21 +15,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Create media directory
+# Create directories
 RUN mkdir -p /app/media /app/staticfiles
 RUN chmod -R 777 /app/media /app/staticfiles
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Set environment variables
-ENV PYTHONPATH=/app:.
-ENV DJANGO_SETTINGS_MODULE=core.production
-ENV DEBUG=False
-ENV ALLOWED_HOSTS=13.126.10.121
-
-# Expose port
 EXPOSE 8000
-
-# Start the application with gunicorn
 CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"] 

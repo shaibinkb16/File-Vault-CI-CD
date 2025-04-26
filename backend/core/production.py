@@ -21,8 +21,13 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-# Allowed hosts
-ALLOWED_HOSTS = ['13.126.10.121']
+# Allowed hosts and CSRF settings
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+CSRF_TRUSTED_ORIGINS = [
+    'http://13.126.10.121',
+    'http://localhost',
+    'http://127.0.0.1'
+]
 
 # Static and media files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
