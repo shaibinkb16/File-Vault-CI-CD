@@ -28,9 +28,17 @@ fi
 mkdir -p /home/ec2-user/abnormal-file-hub/backend/media
 chmod 777 /home/ec2-user/abnormal-file-hub/backend/media
 
-# Stop and remove existing containers
-echo "Stopping existing containers..."
-docker-compose down || true
+# Stop and remove all containers
+echo "Stopping and removing all containers..."
+docker-compose down --remove-orphans || true
+
+# Remove all containers (including those not managed by compose)
+echo "Removing all containers..."
+docker rm -f $(docker ps -aq) || true
+
+# Remove all networks
+echo "Removing all networks..."
+docker network prune -f || true
 
 # Remove existing volumes
 echo "Cleaning up volumes..."
