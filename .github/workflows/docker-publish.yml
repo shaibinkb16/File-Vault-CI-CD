@@ -5,7 +5,6 @@ on:
     branches: [ main ]
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-deploy.yml'
 
 jobs:
   deploy:
@@ -23,35 +22,13 @@ jobs:
           target: "/home/ec2-user/backend"
           strip_components: 1
 
-      - name: Setup and Start Services
+      - name: Start Services
         uses: appleboy/ssh-action@master
         with:
           host: 65.2.168.38
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Go to backend directory
             cd /home/ec2-user/backend
-            
-            # Create necessary directories
-            mkdir -p media staticfiles
-            chmod -R 755 media staticfiles
-            
-            # Create .env file with required variables
-            cat > .env << EOL
-            SECRET_KEY=$(openssl rand -hex 32)
-            DB_NAME=filevault
-            DB_USER=postgres
-            DB_PASSWORD=postgres
-            DB_HOST=localhost
-            DB_PORT=5432
-            EOL
-            
-            # Stop any running containers
-            docker-compose down || true
-            
-            # Start the services
-            docker-compose up -d --build
-            
-            # Show container status
-            docker-compose ps 
+            docker-compose down
+            docker-compose up -d --build 
