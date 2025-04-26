@@ -1,8 +1,12 @@
-name: Deploy to EC2
+name: Deploy Backend to EC2
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'backend/**'
+      - 'docker-compose.yml'
+      - 'deploy.sh'
 
 jobs:
   deploy:
@@ -16,10 +20,10 @@ jobs:
         fetch-depth: 0
         clean: true
 
-    - name: Verify repository structure
+    - name: Verify backend structure
       run: |
-        if [ ! -d "backend" ] || [ ! -d "frontend" ]; then
-          echo "Required directories not found!"
+        if [ ! -d "backend" ]; then
+          echo "Backend directory not found!"
           exit 1
         fi
         if [ ! -f "docker-compose.yml" ] || [ ! -f "deploy.sh" ]; then
@@ -40,20 +44,20 @@ jobs:
         echo "EC2 is not responding after 5 attempts"
         exit 1
 
-    - name: Copy code to EC2
+    - name: Copy backend files to EC2
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
-        source: "."
+        source: "backend/,docker-compose.yml,deploy.sh"
         target: "/home/ec2-user/abnormal-file-hub"
         strip_components: 0
         overwrite: true
         timeout: 60s
         command_timeout: 60s
 
-    - name: SSH and deploy
+    - name: Deploy backend
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -68,9 +72,9 @@ jobs:
           # Navigate to project directory
           cd /home/ec2-user/abnormal-file-hub || exit 1
           
-          # Verify repository structure
-          if [ ! -d "backend" ] || [ ! -d "frontend" ]; then
-            echo "Required directories not found on EC2!"
+          # Verify backend structure
+          if [ ! -d "backend" ]; then
+            echo "Backend directory not found on EC2!"
             exit 1
           fi
           
@@ -102,11 +106,11 @@ jobs:
             exit 1
           fi
           
-          # Verify services are running
-          if ! docker-compose ps | grep -q "Up"; then
-            echo "Services are not running properly!"
-            docker-compose logs
+          # Verify backend service is running
+          if ! docker-compose ps backend | grep -q "Up"; then
+            echo "Backend service is not running properly!"
+            docker-compose logs backend
             exit 1
           fi
           
-          echo "Deployment completed successfully!" 
+          echo "Backend deployment completed successfully!" 
