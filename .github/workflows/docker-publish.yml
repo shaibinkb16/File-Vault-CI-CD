@@ -11,6 +11,20 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        clean: true
+
+    - name: Verify repository structure
+      run: |
+        if [ ! -d "backend" ] || [ ! -d "frontend" ]; then
+          echo "Required directories not found!"
+          exit 1
+        fi
+        if [ ! -f "docker-compose.yml" ] || [ ! -f "deploy.sh" ]; then
+          echo "Required files not found!"
+          exit 1
+        fi
 
     - name: Copy code to EC2
       uses: appleboy/scp-action@v0.1.4
@@ -21,6 +35,7 @@ jobs:
         source: "."
         target: "/home/ec2-user/abnormal-file-hub"
         strip_components: 0
+        overwrite: true
 
     - name: SSH and deploy
       uses: appleboy/ssh-action@master
@@ -35,11 +50,33 @@ jobs:
           # Navigate to project directory
           cd /home/ec2-user/abnormal-file-hub || exit 1
           
+          # Verify repository structure
+          if [ ! -d "backend" ] || [ ! -d "frontend" ]; then
+            echo "Required directories not found on EC2!"
+            exit 1
+          fi
+          
           # Ensure deploy script is executable
           chmod +x deploy.sh || exit 1
           
           # Set proper ownership
           sudo chown -R ec2-user:ec2-user . || exit 1
+          
+          # Ensure Docker service is running
+          sudo systemctl start docker || exit 1
+          
+          # Add ec2-user to docker group if not already added
+          if ! groups ec2-user | grep -q docker; then
+            sudo usermod -aG docker ec2-user || exit 1
+            # Apply new group membership without logout
+            newgrp docker || exit 1
+          fi
+          
+          # Verify Docker access
+          if ! docker info > /dev/null 2>&1; then
+            echo "Docker access verification failed!"
+            exit 1
+          fi
           
           # Run deployment script with error handling
           if ! ./deploy.sh; then
@@ -50,6 +87,7 @@ jobs:
           # Verify services are running
           if ! docker-compose ps | grep -q "Up"; then
             echo "Services are not running properly!"
+            docker-compose logs
             exit 1
           fi
           
