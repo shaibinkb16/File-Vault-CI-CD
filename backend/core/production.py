@@ -4,10 +4,10 @@ from .settings import *
 
 DEBUG = False
 
-# Security settings - temporarily disabled for testing
-SECURE_SSL_REDIRECT = False  # Changed to False for testing
-SESSION_COOKIE_SECURE = False  # Changed to False for testing
-CSRF_COOKIE_SECURE = False  # Changed to False for testing
+# Security settings
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
@@ -17,20 +17,20 @@ SECURE_HSTS_PRELOAD = True
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "https://file-vault-cicd.netlify.app",
-    "http://13.126.10.121:8000",
     "http://localhost:3000",
-    "http://127.0.0.1:3000"
+    "http://127.0.0.1:3000",
+    "https://file-vault-cicd.netlify.app",
+    "http://13.126.10.121:8001"
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 # Allowed hosts and CSRF settings
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '13.126.10.121,localhost,127.0.0.1').split(',')
 CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
     'https://file-vault-cicd.netlify.app',
-    'http://13.126.10.121:8000',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000'
+    'http://13.126.10.121:8001'
 ]
 
 # Static and media files
