@@ -38,6 +38,14 @@ jobs:
           source: "backend/*"
           target: "/home/ec2-user/backend"
           strip_components: 1
+          timeout: 30s
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H 65.2.168.38 >> ~/.ssh/known_hosts
 
       - name: Restart Backend Service
         uses: appleboy/ssh-action@master
@@ -57,3 +65,4 @@ jobs:
             docker-compose up -d --build
             # Show logs for debugging
             docker-compose logs -f
+          timeout: 30s 
