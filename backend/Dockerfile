@@ -12,15 +12,19 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Create necessary directories
+RUN mkdir -p /app/media /app/staticfiles
+RUN chmod -R 755 /app/media /app/staticfiles
+
 # Copy project files
 COPY . .
-
-# Collect static files
-RUN python manage.py collectstatic --noinput
 
 # Create non-root user
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
 
 # Expose port
 EXPOSE 8001
