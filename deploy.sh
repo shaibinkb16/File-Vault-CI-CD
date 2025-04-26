@@ -38,7 +38,7 @@ chmod 777 /home/ec2-user/abnormal-file-hub/backend/media
 echo "Creating frontend configuration..."
 mkdir -p /home/ec2-user/abnormal-file-hub/frontend
 cat > /home/ec2-user/abnormal-file-hub/frontend/.env << EOL
-REACT_APP_API_URL=http://13.200.250.26/api
+REACT_APP_API_URL=http://65.2.168.38/api
 EOL
 
 # Stop and remove all containers
@@ -72,8 +72,8 @@ echo "Backend is running on port: $PORT"
 
 # Update frontend configuration
 echo "Updating frontend configuration..."
-sed -i "s|REACT_APP_API_URL=.*|REACT_APP_API_URL=http://13.200.250.26:$PORT/api|" /home/ec2-user/abnormal-file-hub/frontend/.env
-sed -i "s|REACT_APP_API_URL = .*|REACT_APP_API_URL = \"http://13.200.250.26:$PORT/api\"|" /home/ec2-user/abnormal-file-hub/netlify.toml
+sed -i "s|REACT_APP_API_URL=.*|REACT_APP_API_URL=http://65.2.168.38:$PORT/api|" /home/ec2-user/abnormal-file-hub/frontend/.env
+sed -i "s|REACT_APP_API_URL = .*|REACT_APP_API_URL = \"http://65.2.168.38:$PORT/api\"|" /home/ec2-user/abnormal-file-hub/netlify.toml
 
 # Verify services are running
 echo "Checking service status..."
