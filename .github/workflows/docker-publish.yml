@@ -1,51 +1,116 @@
-name: Backend Deployment
+name: Deploy Backend to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-deploy.yml'
+      - 'docker-compose.yml'
+      - 'deploy.sh'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
-      - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        clean: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+    - name: Verify backend structure
+      run: |
+        if [ ! -d "backend" ]; then
+          echo "Backend directory not found!"
+          exit 1
+        fi
+        if [ ! -f "docker-compose.yml" ] || [ ! -f "deploy.sh" ]; then
+          echo "Required files not found!"
+          exit 1
+        fi
 
-      - name: Install dependencies
-        run: |
-          cd backend
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: Wait for EC2 to be ready
+      run: |
+        for i in {1..5}; do
+          if nc -z -w 5 ${{ secrets.EC2_HOST }} 22; then
+            echo "EC2 is ready"
+            exit 0
+          fi
+          echo "Attempt $i: Waiting for EC2 to be ready..."
+          sleep 10
+        done
+        echo "EC2 is not responding after 5 attempts"
+        exit 1
 
-      - name: Run tests
-        run: |
-          cd backend
-          python manage.py test
+    - name: Copy backend files to EC2
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "backend/,docker-compose.yml,deploy.sh"
+        target: "/home/ec2-user/abnormal-file-hub"
+        strip_components: 0
+        overwrite: true
+        timeout: 60s
+        command_timeout: 60s
 
-      - name: Deploy to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: 65.2.168.38
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "backend/*"
-          target: "/home/ec2-user/backend"
-          strip_components: 1
-
-      - name: Restart Backend Service
-        uses: appleboy/ssh-action@master
-        with:
-          host: 65.2.168.38
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /home/ec2-user/backend
-            docker-compose down
-            docker-compose up -d --build 
+    - name: Deploy backend
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        timeout: 60s
+        command_timeout: 60s
+        script: |
+          # Set up environment
+          export PATH=$PATH:/usr/local/bin
+          
+          # Navigate to project directory
+          cd /home/ec2-user/abnormal-file-hub || exit 1
+          
+          # Verify backend structure
+          if [ ! -d "backend" ]; then
+            echo "Backend directory not found on EC2!"
+            exit 1
+          fi
+          
+          # Ensure deploy script is executable
+          chmod +x deploy.sh || exit 1
+          
+          # Set proper ownership
+          sudo chown -R ec2-user:ec2-user . || exit 1
+          
+          # Ensure Docker service is running
+          sudo systemctl start docker || exit 1
+          
+          # Add ec2-user to docker group if not already added
+          if ! groups ec2-user | grep -q docker; then
+            sudo usermod -aG docker ec2-user || exit 1
+            # Apply new group membership without logout
+            newgrp docker || exit 1
+          fi
+          
+          # Verify Docker access
+          if ! docker info > /dev/null 2>&1; then
+            echo "Docker access verification failed!"
+            exit 1
+          fi
+          
+          # Run deployment script with error handling
+          if ! ./deploy.sh; then
+            echo "Deployment failed!"
+            exit 1
+          fi
+          
+          # Verify backend service is running
+          if ! docker-compose ps backend | grep -q "Up"; then
+            echo "Backend service is not running properly!"
+            docker-compose logs backend
+            exit 1
+          fi
+          
+          echo "Backend deployment completed successfully!" 
