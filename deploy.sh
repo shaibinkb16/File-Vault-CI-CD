@@ -15,7 +15,13 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Start Docker service
-sudo service docker start
+sudo systemctl start docker
+
+# Ensure ec2-user is in docker group
+if ! groups ec2-user | grep -q docker; then
+    sudo usermod -aG docker ec2-user
+    newgrp docker
+fi
 
 # Install Docker Compose if not installed
 if ! command -v docker-compose &> /dev/null; then
