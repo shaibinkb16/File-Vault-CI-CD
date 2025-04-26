@@ -20,25 +20,3 @@ COPY --from=build /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"] 
-
-FROM node:18-alpine
-
-WORKDIR /app
-
-# Install dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy project files
-COPY . .
-
-# Set environment variables
-ENV REACT_APP_API_URL=http://localhost:8000/api
-ENV HOST=0.0.0.0
-ENV PORT=3000
-
-# Expose port
-EXPOSE 3000
-
-# Start the application with host binding
-CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "3000"] 
