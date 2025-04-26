@@ -28,6 +28,13 @@ fi
 mkdir -p /home/ec2-user/abnormal-file-hub/backend/media
 chmod 777 /home/ec2-user/abnormal-file-hub/backend/media
 
+# Create frontend .env file
+echo "Creating frontend configuration..."
+mkdir -p /home/ec2-user/abnormal-file-hub/frontend
+cat > /home/ec2-user/abnormal-file-hub/frontend/.env << EOL
+REACT_APP_API_URL=http://13.126.10.121:8001/api
+EOL
+
 # Stop and remove all containers
 echo "Stopping and removing all containers..."
 docker-compose down --remove-orphans || true
