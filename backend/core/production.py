@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from .settings import *
+from .base import *
 
 DEBUG = False
 
