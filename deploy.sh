@@ -45,6 +45,15 @@ docker-compose up -d
 echo "Waiting for services to start..."
 sleep 30
 
+# Get the assigned port
+PORT=$(docker-compose port backend 8000 | cut -d: -f2)
+echo "Backend is running on port: $PORT"
+
+# Update frontend configuration
+echo "Updating frontend configuration..."
+sed -i "s|REACT_APP_API_URL=.*|REACT_APP_API_URL=http://13.126.10.121:$PORT/api|" /home/ec2-user/abnormal-file-hub/frontend/.env
+sed -i "s|REACT_APP_API_URL = .*|REACT_APP_API_URL = \"http://13.126.10.121:$PORT/api\"|" /home/ec2-user/abnormal-file-hub/netlify.toml
+
 # Verify services are running
 echo "Checking service status..."
 if ! docker-compose ps | grep -q "Up"; then
