@@ -1,0 +1,56 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Copy code to EC2
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "."
+        target: "/home/ec2-user/abnormal-file-hub"
+        strip_components: 0
+
+    - name: SSH and deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          # Set up environment
+          export PATH=$PATH:/usr/local/bin
+          
+          # Navigate to project directory
+          cd /home/ec2-user/abnormal-file-hub || exit 1
+          
+          # Ensure deploy script is executable
+          chmod +x deploy.sh || exit 1
+          
+          # Set proper ownership
+          sudo chown -R ec2-user:ec2-user . || exit 1
+          
+          # Run deployment script with error handling
+          if ! ./deploy.sh; then
+            echo "Deployment failed!"
+            exit 1
+          fi
+          
+          # Verify services are running
+          if ! docker-compose ps | grep -q "Up"; then
+            echo "Services are not running properly!"
+            exit 1
+          fi
+          
+          echo "Deployment completed successfully!" 
