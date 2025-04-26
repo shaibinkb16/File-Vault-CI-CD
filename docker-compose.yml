@@ -10,14 +10,17 @@ services:
     volumes:
       - ./backend:/app
       - media_data:/app/media
+      - static_data:/app/staticfiles
     environment:
       - DJANGO_SETTINGS_MODULE=core.production
       - DEBUG=False
       - SECRET_KEY=2*#q%xftk7bcda3l_y15@76(5e0(@%-a^*08#i+xnxj^lqsx^k
       - ALLOWED_HOSTS=13.126.10.121,localhost,127.0.0.1
     command: >
-      sh -c "python manage.py collectstatic --noinput &&
+      sh -c "mkdir -p /app/staticfiles && 
+             python manage.py collectstatic --noinput --clear && 
              gunicorn core.wsgi:application --bind 0.0.0.0:8000"
 
 volumes:
-  media_data: 
+  media_data:
+  static_data: 
