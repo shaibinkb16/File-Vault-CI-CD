@@ -29,6 +29,28 @@ jobs:
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          cd abnormal-file-hub
-          chmod +x deploy.sh
-          ./deploy.sh
+          # Set up environment
+          export PATH=$PATH:/usr/local/bin
+          
+          # Navigate to project directory
+          cd /home/ec2-user/abnormal-file-hub || exit 1
+          
+          # Ensure deploy script is executable
+          chmod +x deploy.sh || exit 1
+          
+          # Set proper ownership
+          sudo chown -R ec2-user:ec2-user . || exit 1
+          
+          # Run deployment script with error handling
+          if ! ./deploy.sh; then
+            echo "Deployment failed!"
+            exit 1
+          fi
+          
+          # Verify services are running
+          if ! docker-compose ps | grep -q "Up"; then
+            echo "Services are not running properly!"
+            exit 1
+          fi
+          
+          echo "Deployment completed successfully!" 
