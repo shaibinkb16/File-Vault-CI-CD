@@ -8,7 +8,7 @@ interface SearchParams {
   sizeMax?: string;
 }
 
-const API_URL = 'http://13.200.250.26:8000/api';
+const API_URL = 'http://65.2.168.38:8001/api';
 
 export const fileService = {
   async uploadFile(file: globalThis.File): Promise<File> {

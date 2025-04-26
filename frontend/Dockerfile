@@ -3,10 +3,9 @@ FROM node:18-alpine as build
 
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies with caching
 COPY package*.json ./
-RUN npm install
-RUN npm install --save-dev @testing-library/react @testing-library/jest-dom jest @types/jest cypress cypress-file-upload
+RUN npm ci --only=production
 
 # Copy project files
 COPY . .

@@ -15,20 +15,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Create and set permissions for directories
-RUN mkdir -p /app/media /app/staticfiles && \
-    chmod -R 755 /app/media /app/staticfiles
-
-# Set environment variables
-ENV PYTHONPATH=/app:.
-
 # Collect static files
-RUN python manage.py collectstatic --noinput --clear
+RUN python manage.py collectstatic --noinput
 
-# Create a non-root user
-RUN useradd -m -u 1000 appuser && \
-    chown -R appuser:appuser /app
+# Create non-root user
+RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
-EXPOSE 8000
-CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"] 
+# Expose port
+EXPOSE 8001
+
+# Run Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8001", "core.wsgi:application"] 

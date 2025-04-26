@@ -17,25 +17,21 @@ SECURE_HSTS_PRELOAD = True
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "https://file-vault-cicd.netlify.app",
-    "http://13.126.10.121:8001"
+    "http://65.2.168.38:8001",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
 # Allowed hosts and CSRF settings
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '13.126.10.121,localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ['65.2.168.38', 'localhost', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'https://file-vault-cicd.netlify.app',
-    'http://13.126.10.121:8001'
+    "https://file-vault-cicd.netlify.app",
+    "http://65.2.168.38:8001",
 ]
 
 # Static and media files
-STATIC_ROOT = '/app/staticfiles'
-MEDIA_ROOT = '/app/media'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 
@@ -53,4 +49,16 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-] 
+]
+
+# Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'filevault'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+    }
+} 
