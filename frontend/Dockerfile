@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install dependencies with caching
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --only=production --no-audit --no-fund
 
 # Copy project files
 COPY . .
