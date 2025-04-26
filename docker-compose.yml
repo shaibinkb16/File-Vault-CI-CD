@@ -9,24 +9,14 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - media_data:/app/media
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings
-      - DEBUG=True
-      - SECRET_KEY=your-secret-key-here
+      - DEBUG=False
+      - SECRET_KEY=2*#q%xftk7bcda3l_y15@76(5e0(@%-a^*08#i+xnxj^lqsx^k
+      - ALLOWED_HOSTS=13.126.10.121
+      - CORS_ALLOWED_ORIGINS=https://your-netlify-domain.netlify.app
     command: python manage.py runserver 0.0.0.0:8000
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - REACT_APP_API_URL=http://localhost:8000
-    command: npm start
 
 volumes:
   media_data: 

@@ -19,6 +19,10 @@ if ! command -v docker-compose &> /dev/null; then
     sudo chmod +x /usr/local/bin/docker-compose
 fi
 
+# Create necessary directories
+mkdir -p /home/ec2-user/abnormal-file-hub/backend/media
+chmod 777 /home/ec2-user/abnormal-file-hub/backend/media
+
 # Stop and remove existing containers
 docker-compose down
 
@@ -31,4 +35,4 @@ docker-compose up --build -d
 # Check if containers are running
 docker-compose ps
 
-echo "Deployment completed successfully!" 
+echo "Backend deployment completed successfully!" 
