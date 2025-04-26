@@ -1,21 +1,26 @@
 #!/bin/bash
 
-# Update system packages
-sudo yum update -y
+# Exit on error
+set -e
 
-# Install Docker if not already installed
+echo "Starting deployment..."
+
+# Install Docker if not installed
 if ! command -v docker &> /dev/null; then
-    sudo amazon-linux-extras enable docker
+    echo "Installing Docker..."
+    sudo yum update -y
     sudo yum install -y docker
-    sudo systemctl start docker
-    sudo systemctl enable docker
-    sudo usermod -aG docker $USER
+    sudo service docker start
+    sudo usermod -a -G docker ec2-user
 fi
 
-# Install Docker Compose if not already installed
+# Start Docker service
+sudo service docker start
+
+# Install Docker Compose if not installed
 if ! command -v docker-compose &> /dev/null; then
-    sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
-        -o /usr/local/bin/docker-compose
+    echo "Installing Docker Compose..."
+    sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
 fi
 
@@ -24,15 +29,31 @@ mkdir -p /home/ec2-user/abnormal-file-hub/backend/media
 chmod 777 /home/ec2-user/abnormal-file-hub/backend/media
 
 # Stop and remove existing containers
-docker-compose down
+echo "Stopping existing containers..."
+docker-compose down || true
 
-# Remove all unused images
-docker system prune -f
+# Remove existing volumes
+echo "Cleaning up volumes..."
+docker volume prune -f || true
 
 # Build and start containers
-docker-compose up --build -d
+echo "Building and starting containers..."
+docker-compose build --no-cache
+docker-compose up -d
 
-# Check if containers are running
-docker-compose ps
+# Wait for services to start
+echo "Waiting for services to start..."
+sleep 30
 
-echo "Backend deployment completed successfully!" 
+# Verify services are running
+echo "Checking service status..."
+if ! docker-compose ps | grep -q "Up"; then
+    echo "Services are not running properly!"
+    echo "Container logs:"
+    docker-compose logs
+    echo "Docker processes:"
+    docker ps -a
+    exit 1
+fi
+
+echo "Deployment completed successfully!" 
